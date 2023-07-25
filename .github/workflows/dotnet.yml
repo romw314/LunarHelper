@@ -29,3 +29,6 @@ jobs:
     - name: Pack the files
       run: zip LunarHelper.zip LunarHelper
     - name: Upload artifact
+      uses: 
+      with:
+        path: ./LunarHelper.zip
