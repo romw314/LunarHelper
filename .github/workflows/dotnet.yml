@@ -23,7 +23,7 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore
     - name: Build release
-      run: mkdir github_bin && dotnet build ./LunarHelper.csproj --no-restore --configuration Release --output github_bin
+      run: mkdir github_bin && dotnet build ./LunarHelper.csproj --arch x86 --no-restore --configuration Release --output github_bin
     - name: Find files
       run: find
     - name: Upload artifact
