@@ -23,6 +23,6 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore
     - name: Build release
-      run: dotnet build --no-restore --configuration Release
+      run: mkdir github_bin && dotnet build --no-restore --configuration Release --output github_bin
     - name: Find files
       run: find
