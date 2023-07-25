@@ -29,4 +29,4 @@ jobs:
     - name: Upload artifact
       uses: actions/upload-artifact@v3.1.2
       with:
-        path: ./LunarHelper
+        path: ./github_bin
