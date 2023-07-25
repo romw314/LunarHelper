@@ -26,3 +26,6 @@ jobs:
       run: mkdir github_bin && dotnet build --no-restore --configuration Release --output github_bin
     - name: Find files
       run: find
+    - name: Pack the files
+      run: zip LunarHelper.zip LunarHelper
+    - name: Upload artifact
