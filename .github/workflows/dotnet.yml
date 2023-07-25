@@ -27,7 +27,7 @@ jobs:
     - name: Find files
       run: find
     - name: Pack the files
-      run: zip LunarHelper.zip LunarHelper
+      run: zip -r LunarHelper LunarHelper
     - name: Upload artifact
       uses: actions/upload-artifact@v3.1.2
       with:
