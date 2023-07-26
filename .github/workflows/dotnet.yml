@@ -37,7 +37,10 @@ jobs:
         Add-Content -Path ($Env:GITHUB_OUTPUT) "tagname=$tagname"
         Add-Content -Path ($Env:GITHUB_OUTPUT) "releaseid=$releaseid"
     - name: Create draft release
+      id: create-release
       uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         tag_name: ${{ steps.create-tag.outputs.tagname }}
         release_name: Release ${{ steps.create-tag.outputs.releaseid }}
@@ -45,3 +48,24 @@ jobs:
         prerelease: false
     - name: Pack files
       run: zip -r ./LunarHelper.zip ./github_bin
+    - name: Upload release asset
+      uses: actions/upload-release-asset@v1.0.1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create-release.outputs.upload_url }}
+        asset_path: ./LunarHelper.zip
+        asset_name: LunarHelper.zip
+        asset_content_type: application/zip
+    - name: Publish release
+      uses: eregon/publish-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.github_token }}
+      with:
+        release_id: ${{ steps.create-release.outputs.id }}
+        
+    
+    
+    
+    
+    
