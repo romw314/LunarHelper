@@ -28,3 +28,20 @@ jobs:
       uses: actions/upload-artifact@v3.1.2
       with:
         path: ./github_bin
+    - name: Create release tag
+      id: create-tag
+      run: |
+        $releaseid = "$(New-Guid)"
+        $tagname = "release_$releaseid"
+        git tag $tagname
+        Add-Content -Path ($Env:GITHUB_OUTPUT) "tagname=$tagname"
+        Add-Content -Path ($Env:GITHUB_OUTPUT) "releaseid=$releaseid"
+    - name: Create draft release
+      uses: actions/create-release@v1
+      with:
+        tag_name: ${{ steps.create-tag.outputs.tagname }}
+        release_name: Release ${{ steps.create-tag.outputs.releaseid }}
+        draft: true
+        prerelease: false
+    - name: Pack files
+      run: zip -r ./LunarHelper.zip ./github_bin
