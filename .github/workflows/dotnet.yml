@@ -26,7 +26,7 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore
     - name: Build release
-      run: mkdir github_bin && dotnet build .\LunarHelper.csproj --no-restore --configuration Release --output github_bin
+      run: mkdir github_bin && dotnet build ./LunarHelper.csproj --no-restore --configuration Release --output github_bin
     - name: Upload artifact
       uses: actions/upload-artifact@v3.1.2
       with:
