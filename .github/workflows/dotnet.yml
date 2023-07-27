@@ -50,19 +50,14 @@ jobs:
         Add-Content -Path ($Env:GITHUB_OUTPUT) "tagname=$tagname"
         Add-Content -Path ($Env:GITHUB_OUTPUT) "releaseid=$releaseid"
         git push --tags origin --force
-  publish:
-    strategy:
-      matrix:
-        platform: [ "windows", "ubuntu" ]
+  release:
     needs: [ "build", "tag" ]
     runs-on: ubuntu-latest
     permissions: write-all
+    outputs:
+      id: ${{ steps.create-release.outputs.id }}
+      upload_url: ${{ steps.create-release.outputs.upload_url }}
     steps:
-    - name: Download artifact
-      uses: actions/download-artifact@v2.1.1
-      with:
-        name: ${{ matrix.platform }}
-        path: ./github_bin
     - name: Create draft release
       id: create-release
       uses: actions/create-release@v1
@@ -73,6 +68,18 @@ jobs:
         release_name: Release ${{ needs.tag.outputs.releaseid }}
         draft: true
         prerelease: false
+  publish:
+    strategy:
+     matrix:
+       platform: [ "windows", "ubuntu" ]
+    needs: [ "release" ]
+    runs-on: ubuntu-latest
+    steps:
+    - name: Download artifact
+      uses: actions/download-artifact@v2.1.1
+      with:
+        name: ${{ matrix.platform }}
+        path: ./github_bin
     - name: Pack files
       run: zip -r ./LunarHelper.zip ./github_bin
     - name: Upload release asset
@@ -80,7 +87,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: ${{ steps.create-release.outputs.upload_url }}
+        upload_url: ${{ needs.release.outputs.upload_url }}
         asset_path: ./LunarHelper.zip
         asset_name: LunarHelper_${{ matrix.platform }}.zip
         asset_content_type: application/zip
@@ -89,7 +96,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.github_token }}
       with:
-        release_id: ${{ steps.create-release.outputs.id }}
+        release_id: ${{ needs.release.outputs.id }}
         
     
     
