@@ -9,12 +9,13 @@ on:
   pull_request:
     branches: [ "main" ]
 
-permissions: write-all
-
 jobs:
   build:
+    strategy:
+      matrix:
+        os: [ "windows", "ubuntu" ]
 
-    runs-on: windows-latest
+    runs-on: ${{ matrix.os }}-latest
 
     steps:
     - uses: actions/checkout@v3
@@ -29,7 +30,15 @@ jobs:
     - name: Upload artifact
       uses: actions/upload-artifact@v3.1.2
       with:
+        name: ${{ matrix.os }}
         path: ./github_bin
+  tag:
+    runs-on: ubuntu-latest
+    outputs:
+      tagname: ${{ steps.create-tag.outputs.tagname }}
+      releaseid: ${{ steps.create-tag.outputs.releaseid }}
+    steps:
+    - uses: actions/checkout@v3
     - name: Create release tag
       id: create-tag
       run: |
@@ -39,18 +48,30 @@ jobs:
         Add-Content -Path ($Env:GITHUB_OUTPUT) "tagname=$tagname"
         Add-Content -Path ($Env:GITHUB_OUTPUT) "releaseid=$releaseid"
         git push --tags origin --force
+  publish:
+    strategy:
+      matrix:
+        platform: [ "windows", "ubuntu" ]
+    needs: [ "build", "tag" ]
+    runs-on: ubuntu-latest
+    steps:
+    - name: Download artifact
+      uses: actions/download-artifact@v2.1.1
+      with:
+        name: ${{ matrix.platform }}
+        path: ./github_bin
     - name: Create draft release
       id: create-release
       uses: actions/create-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: ${{ steps.create-tag.outputs.tagname }}
-        release_name: Release ${{ steps.create-tag.outputs.releaseid }}
+        tag_name: ${{ jobs.tag.outputs.tagname }}
+        release_name: Release ${{ jobs.tag.outputs.releaseid }}
         draft: true
         prerelease: false
     - name: Pack files
-      run: Compress-Archive -Path .\github_bin -DestinationPath .\LunarHelper.zip
+      run: zip -r ./LunarHelper.zip ./github_bin
     - name: Upload release asset
       uses: actions/upload-release-asset@v1.0.1
       env:
@@ -58,7 +79,7 @@ jobs:
       with:
         upload_url: ${{ steps.create-release.outputs.upload_url }}
         asset_path: ./LunarHelper.zip
-        asset_name: LunarHelper.zip
+        asset_name: LunarHelper_${{ matrix.platform }}.zip
         asset_content_type: application/zip
     - name: Publish release
       uses: eregon/publish-release@v1
