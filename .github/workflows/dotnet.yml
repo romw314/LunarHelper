@@ -33,7 +33,7 @@ jobs:
         name: ${{ matrix.os }}
         path: ./github_bin
   tag:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     outputs:
       tagname: ${{ steps.create-tag.outputs.tagname }}
       releaseid: ${{ steps.create-tag.outputs.releaseid }}
