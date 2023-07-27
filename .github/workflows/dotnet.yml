@@ -74,6 +74,7 @@ jobs:
        platform: [ "windows", "ubuntu" ]
     needs: [ "release" ]
     runs-on: ubuntu-latest
+    permissions: write-all
     steps:
     - name: Download artifact
       uses: actions/download-artifact@v2.1.1
